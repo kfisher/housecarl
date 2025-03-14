@@ -3,18 +3,36 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/fontawesome/css/fontawesome.css" />
+    <link rel="stylesheet" href="/static/fontawesome/css/brands.css" />
+    <link rel="stylesheet" href="/static/fontawesome/css/solid.css" />
+	<link href="/static/bulma/bulma.min.css" rel="stylesheet"/>
+	<link href="/static/app.css" rel="stylesheet"/>
 	<title>Housecarl</title>
 </head>
 <body>
-	<div>
-		HEADER
-	</div>
-	<div>
-		{% block content %}{% endblock %}
-	</div>
-	<div>
-		FOOTER
-	</div>
+    <div class="app-layout">
+        <div class="app-nav-column">
+            <div class="nav--title">
+                <h1 class="title">Housecarl</h1>
+            </div>
+            <div class="menu">
+                <ul class="menu-list">
+                    <li><a>Today</a></li>
+                    <li><a>Inspect</a></li>
+                </ul>
+                <p class="menu-label">Rooms</p>
+                <ul class="menu-list">
+                    <li><a class="is-active">Bedroom</a></li>
+                    <li><a>Kitchen</a></li>
+                    <li><a>Living Room</a></li>
+                    <li><a>Bathroom</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="app-content-column">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
 </body>
 </html>
