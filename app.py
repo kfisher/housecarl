@@ -15,10 +15,44 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from flask import Flask
+from flask import Response
+from flask import redirect
 from flask import render_template
+from flask import url_for
 
 app = Flask(__name__)
 
 @app.route('/')
-def hello_world():
-    return render_template('home.html')
+def home() -> Response:
+    """
+    Redirects the base url '/' to the today page.  
+    
+    """
+    return redirect(url_for('today'))
+
+@app.route('/inspect')
+def inspect() -> str:
+    """
+    Renders the Inspect page.
+
+    """
+    return render_template('inspect.html')
+
+@app.route('/rooms/<int:room_id>')
+def room(room_id: int) -> str:
+    """
+    Renders a Room page.
+
+    :param room_id: 
+        The unique identifier for the room.
+
+    """
+    return render_template('room.html', id=room_id)
+
+@app.route('/today')
+def today() -> str:
+    """
+    Renders the Today page.
+
+    """
+    return render_template('today.html')
