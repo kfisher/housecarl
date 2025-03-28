@@ -13,10 +13,10 @@
 <body>
     <div class="app-layout">
         <div class="app-nav-column">
-            <div class="nav--title">
+            <div class="nav--title hide-for-mobile">
                 <h1 class="title">Housecarl</h1>
             </div>
-            <div class="menu">
+            <div class="menu hide-for-mobile">
                 <ul class="menu-list">
                     <li><a href="/today">Today</a></li>
                     <li><a href="/inspect">Inspect</a></li>
@@ -28,6 +28,20 @@
                     <li><a href="/rooms/3">Living Room</a></li>
                     <li><a href="/rooms/4">Bathroom</a></li>
                 </ul>
+            </div>
+            <div class="mobile-menu">
+                <a class="mobile-menu--item" href="/today">
+                    <span class="icon"><i class="fas fa-calendar"></i></span>
+                    Today
+                </a>
+                <a class="mobile-menu--item" href="/inspect">
+                    <span class="icon"><i class="fas fa-magnifying-glass"></i></span>
+                    Inspect
+                </a>
+                <a class="mobile-menu--item" href="/rooms">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    Rooms
+                </a>
             </div>
         </div>
         <div class="app-content-column">

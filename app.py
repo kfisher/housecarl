@@ -27,6 +27,8 @@ def home() -> Response:
     """
     Redirects the base url '/' to the today page.  
     
+    :returns:
+        Response object for redirecting to the Today page.
     """
     return redirect(url_for('today'))
 
@@ -35,24 +37,40 @@ def inspect() -> str:
     """
     Renders the Inspect page.
 
+    :returns:
+        The HTML for the Inspect page.
     """
     return render_template('inspect.html')
 
+@app.route('/rooms')
+def room_list() -> str:
+    """
+    Renders the Room List page.
+
+    :returns:
+        The HTML for the Room List page.
+    """
+    return render_template('room_list.html')
+
 @app.route('/rooms/<int:room_id>')
-def room(room_id: int) -> str:
+def room_details(room_id: int) -> str:
     """
     Renders a Room page.
 
     :param room_id: 
         The unique identifier for the room.
 
+    :returns:
+        The HTML for the Room page.
     """
-    return render_template('room.html', id=room_id)
+    return render_template('room_details.html', id=room_id)
 
 @app.route('/today')
 def today() -> str:
     """
     Renders the Today page.
 
+    :returns:
+        The HTML for the Today page.
     """
     return render_template('today.html')

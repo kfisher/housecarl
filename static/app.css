@@ -1,16 +1,26 @@
+:root {
+    --hc-screen-break: 1024px;
+    --hc-border: var(--bulma-border);
+    --hc-content-background: hsl(0, 0%, 14%);
+    --hc-menu-text: hsl(var(--bulma-menu-item-h),var(--bulma-menu-item-s),var(--bulma-menu-item-color-l));
+}
+
 html, body {
     height: 100% !important;
 }
 
+
+
 .app-layout {
-    height: 100%;
+    align-items: stretch;
     display: flex;
     flex-direction: row;
+    height: 100%;
     justify-content: stretch;
-    align-items: stretch;
 }
 
 .app-content-column {
+    background-color: var(--hc-content-background);
 	flex: 1;
 }
 
@@ -22,4 +32,47 @@ html, body {
 	text-align: center;
 	margin-top: 1em;
 	margin-bottom: 1em;
+}
+
+.mobile-menu {
+    display: none;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mobile-menu--item {
+    align-items: center;
+    border-top: 1px solid var(--hc-border);
+    color: var(--hc-menu-text);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-top: 4px;
+}
+
+.mobile-menu--item:first-child {
+    border-right: 1px solid var(--hc-border);
+}
+
+.mobile-menu--item:last-child {
+    border-left: 1px solid var(--hc-border);
+}
+
+@media screen and (max-width:600px) {
+
+    .app-layout {
+        flex-direction: column-reverse;
+    }
+
+    .app-nav-column {
+        width: 100%;
+    }
+
+    .hide-for-mobile {
+        display: none;
+    }
+
+    .mobile-menu {
+        display: flex;
+    }
 }
