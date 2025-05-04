@@ -67,7 +67,7 @@ def create_room(room: CreateRoomRequest) -> CreateRoomResponse:
     Creates a new room.
 
     """
-    return CreateRoomResponse()
+    return CreateRoomResponse(id = 1, name = 'Name')
 
 class UpdateRoomRequest(BaseModel):
     """
