@@ -1,2 +1,5 @@
 # python virtual environment
 .venv
+
+# python build and cache folders and files
+__pycache__/
