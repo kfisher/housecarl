@@ -16,32 +16,78 @@
 # ==============================================================================
 """
 """
+import pytest
 from fastapi.testclient import TestClient
-from app.main import app
+from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel.pool import StaticPool
 
-client = TestClient(app)
+from .main import app
+from .db import Room, get_session
 
-def test_read_rooms():
+@pytest.fixture(name='session')
+def session_fixture():
+    """
+    Fixture to create a test database session.
+
+    """
+    engine = create_engine(
+        'sqlite://',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+
+@pytest.fixture(name='client')
+def client_fixture(session):
+    """
+    Fixture to create a test client.
+
+    """
+    def get_session_override():
+        return session
+    app.dependency_overrides[get_session] = get_session_override
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+def test_read_rooms(session: Session, client: TestClient):
     """
     Tests GET /api/v1/rooms endpoint.
 
     """
-    response = client.get('/api/v1/rooms')
-    assert response.status_code == 200
-    # TODO: Validate the JSON response
-    # assert response.json() == ?
+    room_0 = Room(name='Living Room')
+    room_1 = Room(name='Kitchen')
+    session.add(room_0)
+    session.add(room_1)
+    session.commit()
 
-def test_read_room():
+    response = client.get('/api/v1/rooms')
+    data = response.json()
+
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert data[0]['name'] == 'Living Room'
+    assert data[1]['name'] == 'Kitchen'
+
+def test_read_room(session: Session, client: TestClient):
     """
     Tests GET /api/v1/rooms/{room_id} endpoint.
 
     """
-    response = client.get('/api/v1/rooms/1')
-    assert response.status_code == 200
-    # TODO: Validate the JSON response
-    # assert response.json() == ?
+    room_0 = Room(name='Bedroom')
+    session.add(room_0)
+    session.commit()
 
-def test_read_room_not_found():
+    response = client.get(f'/api/v1/rooms/{room_0.id}')
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data['name'] == 'Bedroom'
+
+
+def test_read_room_not_found(client: TestClient):
     """
     Tests GET /api/v1/rooms/{room_id} endpoint with a non-existent room.
 
@@ -49,60 +95,114 @@ def test_read_room_not_found():
     response = client.get('/api/v1/rooms/999')
     assert response.status_code == 404
 
-def test_create_room():
+def test_create_room(session: Session, client: TestClient):
     """
     Tests POST /api/v1/rooms endpoint.
 
     """
-    response = client.post('/api/v1/rooms', json={'name': 'Kitchen'})
-    assert response.status_code == 201
-    # TODO: Validate the JSON response
-    # TODO: Validate that the room was actually created
-    # assert response.json() == ?
+    response = client.post('/api/v1/rooms', json={'name': 'Laundry Room'})
+    data = response.json()
+    room_in_db = session.get(Room, data['id'])
 
-def test_create_room_invalid():
+    assert response.status_code == 201
+    assert room_in_db is not None
+    assert room_in_db.name == 'Laundry Room'
+    assert data['name'] == 'Laundry Room'
+
+def test_create_room_invalid(client: TestClient):
     """
     Tests POST /api/v1/rooms endpoint with invalid data.
+
+    """
+    response = client.post('/api/v1/rooms', json={})
+    assert response.status_code == 422
+
+def test_create_room_empty_name(client: TestClient):
+    """
+    Tests POST /api/v1/rooms endpoint with an empty name.
 
     """
     response = client.post('/api/v1/rooms', json={'name': ''})
     assert response.status_code == 422
 
-def test_update_room():
+# TODO: Test for unique constraint violation - creation.
+
+def test_update_room(session: Session, client: TestClient):
     """
-    Tests PUT /api/v1/rooms/{room_id} endpoint.
+    Tests PATCH /api/v1/rooms/{room_id} endpoint.
 
     """
-    response = client.put('/api/v1/rooms/1', json={'name': 'Updated Kitchen'})
-    assert response.status_code == 200
-    # TODO: Validate that the data was actually updated.
+    room_0 = Room(name='Drawing')
+    session.add(room_0)
+    session.commit()
 
-def test_update_room_not_found():
+    response = client.patch(
+        f'/api/v1/rooms/{room_0.id}',
+        json={'name': 'Study'}
+    )
+    room_in_db = session.get(Room, room_0.id)
+
+    assert response.status_code == 204
+    assert room_in_db.name == 'Study'
+
+def test_update_room_not_found(client: TestClient):
     """
-    Tests PUT /api/v1/rooms/{room_id} endpoint with a non-existent room.
+    Tests PATCH /api/v1/rooms/{room_id} endpoint with a non-existent room.
 
     """
-    response = client.put('/api/v1/rooms/999', json={'name': 'Updated Kitchen'})
+    response = client.patch(
+        '/api/v1/rooms/999', 
+        json={'name': 'Updated Kitchen'}
+    )
     assert response.status_code == 404
 
-def test_update_room_invalid():
+def test_update_room_no_name_change(session: Session, client: TestClient):
     """
-    Tests PUT /api/v1/rooms/{room_id} endpoint with invalid data.
+    Tests PATCH /api/v1/rooms/{room_id} endpoint where the request does
+    not change the name.
 
     """
-    response = client.put('/api/v1/rooms/1', json={'name': ''})
+    room_0 = Room(name='Drawing')
+    session.add(room_0)
+    session.commit()
+
+    response = client.patch(f'/api/v1/rooms/{room_0.id}', json={})
+    room_in_db = session.get(Room, room_0.id)
+
+    assert response.status_code == 204
+    assert room_in_db.name == 'Drawing'
+
+def test_update_room_empty_name(session: Session, client: TestClient):
+    """
+    Tests PATCH /api/v1/rooms/{room_id} endpoint with an empty name.
+
+    """
+    room_0 = Room(name='Drawing')
+    session.add(room_0)
+    session.commit()
+
+    response = client.patch(f'/api/v1/rooms/{room_0.id}', json={'name': ''})
+
     assert response.status_code == 422
 
-def test_delete_room():
+# TODO: Test for unique constraint violation - update.
+
+def test_delete_room(session: Session, client: TestClient):
     """
     Tests DELETE /api/v1/rooms/{room_id} endpoint.
 
     """
-    response = client.delete('/api/v1/rooms/1')
-    assert response.status_code == 204
-    # TODO: Validate that the room was actually deleted
+    room_0 = Room(name='Bathroom')
+    session.add(room_0)
+    session.commit()
 
-def test_delete_room_not_found():
+    response = client.delete(f'/api/v1/rooms/{room_0.id}')
+    room_in_db = session.get(Room, room_0.id)
+
+    assert response.status_code == 204
+    assert room_in_db is None
+
+def test_delete_room_not_found(client: TestClient):
     """
     Tests DELETE /api/v1/rooms/{room_id} endpoint with a non-existent room.
 
