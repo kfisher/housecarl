@@ -3,3 +3,6 @@
 
 # python build and cache folders and files
 __pycache__/
+
+# database
+*.db
