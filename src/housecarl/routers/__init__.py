@@ -6,6 +6,5 @@ Defines the application routers.
 
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-

@@ -15,6 +15,5 @@ db.initialize()
 
 app = FastAPI()
 
-app.include_router(rooms.router, prefix='/api/rooms', tags=['rooms'])
-app.include_router(tasks.router, prefix='/api/tasks', tags=['tasks'])
-
+app.include_router(rooms.router, prefix="/api/rooms", tags=["rooms"])
+app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])

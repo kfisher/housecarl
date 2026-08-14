@@ -6,21 +6,21 @@ Handles interfacing with the application database.
 
 """
 
-from typing import Annotated, Generator
+from collections.abc import Generator
+from typing import Annotated
 
 from fastapi import Depends
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from housecarl.db.models import Base
 
-
 DATABASE_URL = "sqlite:///housecarl.db"
 
-engine = create_engine(DATABASE_URL, connect_args={'check_same_thread': False})
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 def get_session() -> Generator[Session]:
     """
@@ -44,6 +44,5 @@ def initialize():
     Base.metadata.create_all(engine)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-

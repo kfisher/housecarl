@@ -6,9 +6,8 @@ Defines the database models.
 
 """
 
-from datetime import UTC, datetime, timedelta
-
 import enum
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import (
     DateTime,
@@ -18,7 +17,6 @@ from sqlalchemy import (
     Interval,
     String,
 )
-
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -32,11 +30,12 @@ class InspectionState(enum.Enum):
     Specifies the possible inspection states.
 
     """
-    Unknown   = 0
-    Critical  = 1
-    Poor      = 2
-    Fair      = 3
-    Good      = 4
+
+    Unknown = 0
+    Critical = 1
+    Poor = 2
+    Fair = 3
+    Good = 4
     Excellent = 5
 
 
@@ -45,7 +44,6 @@ class Base(DeclarativeBase):
     Base class for all application database models.
 
     """
-    pass
 
 
 class Room(Base):
@@ -54,15 +52,15 @@ class Room(Base):
 
     """
 
-    __tablename__ = 'rooms'
+    __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     title: Mapped[str] = mapped_column(String)
 
     tasks: Mapped[list[Task]] = relationship(
-        back_populates='room',
-        cascade='all, delete-orphan',
+        back_populates="room",
+        cascade="all, delete-orphan",
     )
 
 
@@ -72,13 +70,13 @@ class Task(Base):
 
     """
 
-    __tablename__ = 'tasks'
+    __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     title: Mapped[str] = mapped_column(String, nullable=False)
 
-    description: Mapped[str|None] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         String,
         nullable=True,
         default=None,
@@ -89,7 +87,7 @@ class Task(Base):
     state: Mapped[InspectionState] = mapped_column(
         Enum(InspectionState),
         nullable=False,
-    ) 
+    )
 
     last_performed: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -109,9 +107,8 @@ class Task(Base):
         index=True,
     )
 
-    room: Mapped[Room] = relationship(back_populates='tasks')
+    room: Mapped[Room] = relationship(back_populates="tasks")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-

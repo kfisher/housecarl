@@ -10,6 +10,5 @@ management application geared home cleaning and routine maintenance.
 
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-

@@ -7,8 +7,7 @@ Defines the routes and handlers for the tasks endpoint.
 """
 
 from fastapi import APIRouter, HTTPException, status
-
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from housecarl.db import DatabaseSession
@@ -36,7 +35,7 @@ def get_task_or_404(task_id: int, db: Session) -> Task:
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Task not found',
+            detail="Task not found",
         )
     return task
 
@@ -44,7 +43,7 @@ def get_task_or_404(task_id: int, db: Session) -> Task:
 router = APIRouter()
 
 
-@router.get('', response_model=list[TaskItem])
+@router.get("", response_model=list[TaskItem])
 def all(db: DatabaseSession):
     """
     Returns list of all tasks.
@@ -53,7 +52,7 @@ def all(db: DatabaseSession):
     return db.execute(select(Task)).scalars().all()
 
 
-@router.get('/{task_id}', response_model=TaskDetails)
+@router.get("/{task_id}", response_model=TaskDetails)
 def details(task_id: int, db: DatabaseSession):
     """
     Returns the details for a task.
@@ -62,7 +61,7 @@ def details(task_id: int, db: DatabaseSession):
     return get_task_or_404(task_id, db)
 
 
-@router.post('', response_model=TaskItem, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TaskItem, status_code=status.HTTP_201_CREATED)
 def create(task: TaskCreate, db: DatabaseSession):
     """
     Creates a new task entry in the database.
@@ -76,7 +75,7 @@ def create(task: TaskCreate, db: DatabaseSession):
     return db_task
 
 
-@router.patch('/{task_id}', response_model=TaskItem)
+@router.patch("/{task_id}", response_model=TaskItem)
 def update(task_id: int, task: TaskUpdate, db: DatabaseSession):
     """
     Updates an existing task in the database.
@@ -84,8 +83,8 @@ def update(task_id: int, task: TaskUpdate, db: DatabaseSession):
     """
     db_task = get_task_or_404(task_id, db)
     updates = task.model_dump(exclude_unset=True)
-    if 'room_id' in updates:
-        get_room_or_404(updates['room_id'], db)
+    if "room_id" in updates:
+        get_room_or_404(updates["room_id"], db)
     for key, value in updates.items():
         setattr(db_task, key, value)
     db.commit()
@@ -93,7 +92,7 @@ def update(task_id: int, task: TaskUpdate, db: DatabaseSession):
     return db_task
 
 
-@router.delete('/{task_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(task_id: int, db: DatabaseSession):
     """
     Deletes a task entry from the database and any associated tasks.
@@ -104,6 +103,5 @@ def delete(task_id: int, db: DatabaseSession):
     db.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-

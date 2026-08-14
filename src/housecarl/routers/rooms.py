@@ -7,13 +7,13 @@ Defines the routes and handlers for the rooms endpoint.
 """
 
 from fastapi import APIRouter, HTTPException, status
-
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from housecarl.db import DatabaseSession
 from housecarl.db.models import Room
 from housecarl.schema import RoomCreate, RoomDetails, RoomItem, RoomUpdate
+
 
 def get_room_or_404(room_id: int, db: Session) -> Room:
     """
@@ -34,7 +34,7 @@ def get_room_or_404(room_id: int, db: Session) -> Room:
     if room is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Room not found',
+            detail="Room not found",
         )
     return room
 
@@ -42,7 +42,7 @@ def get_room_or_404(room_id: int, db: Session) -> Room:
 router = APIRouter()
 
 
-@router.get('', response_model=list[RoomItem])
+@router.get("", response_model=list[RoomItem])
 def all(db: DatabaseSession):
     """
     Returns list of all rooms.
@@ -51,7 +51,7 @@ def all(db: DatabaseSession):
     return db.execute(select(Room)).scalars().all()
 
 
-@router.get('/{room_id}', response_model=RoomDetails)
+@router.get("/{room_id}", response_model=RoomDetails)
 def details(room_id: int, db: DatabaseSession):
     """
     Returns the details for a room.
@@ -60,7 +60,7 @@ def details(room_id: int, db: DatabaseSession):
     return get_room_or_404(room_id, db)
 
 
-@router.post('', response_model=RoomItem, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=RoomItem, status_code=status.HTTP_201_CREATED)
 def create(room: RoomCreate, db: DatabaseSession):
     """
     Creates a new room entry in the database.
@@ -73,7 +73,7 @@ def create(room: RoomCreate, db: DatabaseSession):
     return db_room
 
 
-@router.patch('/{room_id}', response_model=RoomItem)
+@router.patch("/{room_id}", response_model=RoomItem)
 def update(room_id: int, room: RoomUpdate, db: DatabaseSession):
     """
     Updates an existing room in the database.
@@ -87,7 +87,7 @@ def update(room_id: int, room: RoomUpdate, db: DatabaseSession):
     return db_room
 
 
-@router.delete('/{room_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(room_id: int, db: DatabaseSession):
     """
     Deletes a room entry from the database and any associated tasks.
@@ -98,6 +98,5 @@ def delete(room_id: int, db: DatabaseSession):
     db.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
-
