@@ -24,7 +24,7 @@ def create_task(client, room_id, **overrides):
     """
     payload = {
         "title": "Clean counters",
-        "state": 4,
+        "state": 3,
         "frequency": "P1D",
         "room_id": room_id,
     }

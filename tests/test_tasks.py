@@ -24,7 +24,7 @@ def create_task(client, room_id, **overrides):
     """
     payload = {
         "title": "Clean counters",
-        "state": 4,
+        "state": 3,
         "frequency": "P1D",
         "room_id": room_id,
     }
@@ -64,7 +64,7 @@ def test_details_returns_task(client):
     assert body["id"] == task["id"]
     assert body["title"] == "Clean counters"
     assert body["description"] == "Wipe down all surfaces"
-    assert body["state"] == 4
+    assert body["state"] == 3
     assert body["frequency"] == "P1D"
     assert "last_performed" in body
     assert "last_inspected" in body
@@ -83,7 +83,7 @@ def test_create_adds_task(client):
         "/api/tasks",
         json={
             "title": "Clean counters",
-            "state": 4,
+            "state": 3,
             "frequency": "P1D",
             "room_id": room["id"],
         },
@@ -92,7 +92,7 @@ def test_create_adds_task(client):
     assert response.status_code == 201
     body = response.json()
     assert body["title"] == "Clean counters"
-    assert body["state"] == 4
+    assert body["state"] == 3
     assert "id" in body
 
     listed = client.get("/api/tasks").json()
@@ -104,7 +104,7 @@ def test_create_requires_title(client):
 
     response = client.post(
         "/api/tasks",
-        json={"state": 4, "frequency": "P1D", "room_id": room["id"]},
+        json={"state": 3, "frequency": "P1D", "room_id": room["id"]},
     )
 
     assert response.status_code == 422
@@ -115,7 +115,7 @@ def test_create_returns_404_for_unknown_room(client):
         "/api/tasks",
         json={
             "title": "Clean counters",
-            "state": 4,
+            "state": 3,
             "frequency": "P1D",
             "room_id": 1,
         },
@@ -144,7 +144,7 @@ def test_update_changes_fields(client):
 
 def test_update_changes_state(client):
     room = create_room(client)
-    task = create_task(client, room["id"], state=4)
+    task = create_task(client, room["id"], state=3)
 
     response = client.patch(f"/api/tasks/{task['id']}", json={"state": 2})
 

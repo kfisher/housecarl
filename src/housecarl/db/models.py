@@ -33,10 +33,8 @@ class InspectionState(enum.Enum):
 
     Unknown = 0
     Critical = 1
-    Poor = 2
-    Fair = 3
-    Good = 4
-    Excellent = 5
+    Fair = 2
+    Good = 3
 
 
 class Base(DeclarativeBase):
