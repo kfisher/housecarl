@@ -7,6 +7,7 @@ Defines the API schema.
 """
 
 from datetime import datetime, timedelta
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -166,6 +167,10 @@ class TaskItem(TaskBase):
         description="The unique identifier for the task.",
     )
 
+    room: RoomItem = Field(
+        description="The room the task is associated with.",
+    )
+
 
 class TaskDetails(TaskBase):
     """
@@ -189,6 +194,38 @@ class TaskDetails(TaskBase):
 
     last_inspected: datetime = Field(
         description="Last time the state was inspected",
+    )
+
+
+class RandomTaskGenerate(BaseModel):
+    """
+    Model used when generating a new set of random tasks.
+
+    """
+
+    count: Literal[4, 6, 12, 20] = Field(
+        description="Number of random tasks to generate.",
+    )
+
+
+class RandomTaskItem(BaseModel):
+    """
+    Model used to get basic information about a random task.
+
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field(
+        description="The unique identifier for the random task entry.",
+    )
+
+    number: int = Field(
+        description="Number assigned to the random task.",
+    )
+
+    task: TaskItem = Field(
+        description="The task selected for this random task entry.",
     )
 
 

@@ -108,5 +108,26 @@ class Task(Base):
     room: Mapped[Room] = relationship(back_populates="tasks")
 
 
+class RandomTask(Base):
+    """
+    Database model for random tasks.
+
+    """
+
+    __tablename__ = "random_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    number: Mapped[int] = mapped_column(Integer, index=True, unique=True)
+
+    task_id: Mapped[int] = mapped_column(
+        ForeignKey("tasks.id"),
+        nullable=False,
+        index=True,
+    )
+
+    task: Mapped[Task] = relationship()
+
+
 if __name__ == "__main__":
     pass

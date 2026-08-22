@@ -9,7 +9,7 @@ Application entry point.
 from fastapi import FastAPI
 
 from housecarl import db
-from housecarl.routers import rooms, tasks
+from housecarl.routers import random_tasks, rooms, tasks
 
 db.initialize()
 
@@ -17,3 +17,8 @@ app = FastAPI()
 
 app.include_router(rooms.router, prefix="/api/rooms", tags=["rooms"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
+app.include_router(
+    random_tasks.router,
+    prefix="/api/random-tasks",
+    tags=["random-tasks"],
+)
