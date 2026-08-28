@@ -57,6 +57,12 @@ async function confirmCompleteTask(payload) {
   closeCompleteTaskModal()
   await fetchScheduledTasks()
 }
+
+async function removeTask(task) {
+  const response = await fetch(`/api/scheduled-tasks/${task.id}`, { method: 'DELETE' })
+  if (!response.ok) return
+  await fetchScheduledTasks()
+}
 </script>
 
 <template>
@@ -72,6 +78,7 @@ async function confirmCompleteTask(payload) {
           :tasks="overdueTasks"
           :loading="loading"
           @complete="openCompleteTaskModal"
+          @remove="removeTask"
         />
       </section>
 
@@ -82,6 +89,7 @@ async function confirmCompleteTask(payload) {
           :loading="loading"
           empty-message="No tasks scheduled for today."
           @complete="openCompleteTaskModal"
+          @remove="removeTask"
         />
       </section>
     </template>

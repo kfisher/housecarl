@@ -16,7 +16,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['complete'])
+const emit = defineEmits(['complete', 'remove'])
 
 const stateLabels = taskStateLabels
 
@@ -34,7 +34,12 @@ const stateTagClass = {
       <tr v-for="entry in tasks" :key="entry.id" class="scheduled-task-list__row">
         <td class="scheduled-task-list__cell-middle scheduled-task-list__actions">
           <span class="scheduled-task-list__row-actions">
-            <button class="button is-small is-text" type="button" title="Remove">
+            <button
+              class="button is-small is-text"
+              type="button"
+              title="Remove"
+              @click="emit('remove', entry.task)"
+            >
               <font-awesome-icon :icon="['fas', 'xmark']" size="sm" />
             </button>
             <button
