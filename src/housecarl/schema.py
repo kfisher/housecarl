@@ -229,5 +229,37 @@ class RandomTaskItem(BaseModel):
     )
 
 
+class ScheduledTaskSchedule(BaseModel):
+    """
+    Model used when scheduling a task.
+
+    """
+
+    date: datetime = Field(
+        description="Date the task is scheduled to be performed.",
+    )
+
+
+class ScheduledTaskItem(BaseModel):
+    """
+    Model used to get basic information about a scheduled task.
+
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field(
+        description="The unique identifier for the scheduled task entry.",
+    )
+
+    date: datetime = Field(
+        description="Date the task is scheduled to be performed.",
+    )
+
+    task: TaskItem = Field(
+        description="The task that has been scheduled.",
+    )
+
+
 if __name__ == "__main__":
     pass

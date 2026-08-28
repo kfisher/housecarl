@@ -129,5 +129,30 @@ class RandomTask(Base):
     task: Mapped[Task] = relationship()
 
 
+class ScheduledTask(Base):
+    """
+    Database model for tasks that have been scheduled.
+
+    """
+
+    __tablename__ = "scheduled_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    task_id: Mapped[int] = mapped_column(
+        ForeignKey("tasks.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    task: Mapped[Task] = relationship()
+
+
 if __name__ == "__main__":
     pass
