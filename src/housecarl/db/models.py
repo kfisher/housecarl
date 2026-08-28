@@ -112,6 +112,16 @@ class Task(Base):
         cascade="all, delete-orphan",
     )
 
+    random_task: Mapped[RandomTask | None] = relationship(
+        back_populates="task",
+        cascade="all, delete-orphan",
+    )
+
+    scheduled_task: Mapped[ScheduledTask | None] = relationship(
+        back_populates="task",
+        cascade="all, delete-orphan",
+    )
+
 
 class TaskNote(Base):
     """
@@ -158,7 +168,7 @@ class RandomTask(Base):
         index=True,
     )
 
-    task: Mapped[Task] = relationship()
+    task: Mapped[Task] = relationship(back_populates="random_task")
 
 
 class ScheduledTask(Base):
@@ -183,7 +193,7 @@ class ScheduledTask(Base):
         index=True,
     )
 
-    task: Mapped[Task] = relationship()
+    task: Mapped[Task] = relationship(back_populates="scheduled_task")
 
 
 if __name__ == "__main__":

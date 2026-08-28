@@ -6,6 +6,8 @@ Automated testing for the '/api/tasks' endpoints.
 
 """
 
+from datetime import UTC, datetime
+
 
 def create_room(client, title="Kitchen"):
     """
@@ -207,6 +209,34 @@ def test_delete_returns_404_for_unknown_task(client):
     response = client.delete("/api/tasks/1")
 
     assert response.status_code == 404
+
+
+def test_delete_removes_associated_random_task(client):
+    room = create_room(client)
+    task = create_task(client, room["id"], state=1)
+    generate = client.post("/api/random-tasks", json={"count": 4})
+    assert generate.status_code == 201
+    assert len(generate.json()) == 1
+
+    response = client.delete(f"/api/tasks/{task['id']}")
+
+    assert response.status_code == 204
+    assert client.get("/api/random-tasks").json() == []
+
+
+def test_delete_removes_associated_scheduled_task(client):
+    room = create_room(client)
+    task = create_task(client, room["id"])
+    schedule = client.put(
+        f"/api/scheduled-tasks/{task['id']}",
+        json={"date": datetime.now(UTC).isoformat()},
+    )
+    assert schedule.status_code == 200
+
+    response = client.delete(f"/api/tasks/{task['id']}")
+
+    assert response.status_code == 204
+    assert client.get("/api/scheduled-tasks").json() == []
 
 
 if __name__ == "__main__":
