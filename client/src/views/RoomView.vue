@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { fetchScheduledTaskIds, scheduleTaskToday } from '@/api/scheduledTasks'
 import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
 import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
@@ -49,6 +50,12 @@ const deleteTaskMessage = computed(() =>
 const completeTaskModalOpen = ref(false)
 const completingTask = ref(null)
 
+const scheduledTaskIds = ref(new Set())
+
+async function refreshScheduledTaskIds() {
+  scheduledTaskIds.value = await fetchScheduledTaskIds()
+}
+
 const displayOpen = ref(false)
 const displayRef = ref(null)
 
@@ -77,6 +84,7 @@ async function fetchRoom() {
 
 onMounted(fetchRoom)
 onMounted(() => roomsStore.fetchRooms())
+onMounted(refreshScheduledTaskIds)
 watch(() => props.id, fetchRoom)
 
 function openAddTaskModal() {
@@ -124,6 +132,12 @@ async function confirmDeleteTask() {
   await fetchRoom()
 }
 
+async function scheduleForToday(task) {
+  const response = await scheduleTaskToday(task.id)
+  if (!response.ok) return
+  await refreshScheduledTaskIds()
+}
+
 function openCompleteTaskModal(task) {
   completingTask.value = task
   completeTaskModalOpen.value = true
@@ -143,6 +157,7 @@ async function confirmCompleteTask(payload) {
   })
   if (!response.ok) return
   await removeCompletedTaskFromLists(completingTask.value.id)
+  await refreshScheduledTaskIds()
   closeCompleteTaskModal()
   await fetchRoom()
 }
@@ -290,7 +305,19 @@ function formatDate(value) {
         <tr v-for="task in filteredTasks" :key="task.id" class="room-view__task-row">
           <td class="room-view__cell-middle room-view__actions">
             <span class="room-view__row-actions">
-              <button class="button is-small is-text" type="button" title="Today">
+              <div
+                v-if="scheduledTaskIds.has(task.id)"
+                class="button is-small is-text is-scheduled"
+              >
+                <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
+              </div>
+              <button
+                v-else
+                class="button is-small is-text"
+                type="button"
+                title="Today"
+                @click="scheduleForToday(task)"
+              >
                 <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
               </button>
               <button
@@ -388,6 +415,16 @@ function formatDate(value) {
 .room-view__row-actions {
   display: flex;
   gap: 0.25rem;
+}
+
+.room-view__row-actions .is-scheduled,
+.room-view__row-actions .is-scheduled:hover {
+    color: var(--bulma-success);
+}
+
+.room-view__row-actions .is-scheduled:hover {
+    background-color: transparent;
+    cursor: default;
 }
 
 .room-view__task-row:hover .room-view__row-actions {

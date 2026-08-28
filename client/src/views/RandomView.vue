@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 
+import { fetchScheduledTaskIds, scheduleTaskToday } from '@/api/scheduledTasks'
 import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
 import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import RandomTaskCountModal from '@/components/RandomTaskCountModal.vue'
@@ -17,6 +18,12 @@ const selectedTaskId = ref(null)
 
 const completeTaskModalOpen = ref(false)
 const completingTask = ref(null)
+
+const scheduledTaskIds = ref(new Set())
+
+async function refreshScheduledTaskIds() {
+  scheduledTaskIds.value = await fetchScheduledTaskIds()
+}
 
 const stateLabels = taskStateLabels
 
@@ -42,6 +49,7 @@ async function fetchRandomTasks() {
 }
 
 onMounted(fetchRandomTasks)
+onMounted(refreshScheduledTaskIds)
 
 async function generate(count) {
   error.value = null
@@ -79,6 +87,12 @@ function selectRandomTask() {
   selectedTaskId.value = randomTasks.value[index].id
 }
 
+async function scheduleForToday(task) {
+  const response = await scheduleTaskToday(task.id)
+  if (!response.ok) return
+  await refreshScheduledTaskIds()
+}
+
 function openCompleteTaskModal(task) {
   completingTask.value = task
   completeTaskModalOpen.value = true
@@ -98,6 +112,7 @@ async function confirmCompleteTask(payload) {
   })
   if (!response.ok) return
   await removeCompletedTaskFromLists(completingTask.value.id)
+  await refreshScheduledTaskIds()
   closeCompleteTaskModal()
   await fetchRandomTasks()
 }
@@ -138,7 +153,19 @@ async function confirmCompleteTask(payload) {
           <td class="random-view__cell-middle random-view__number">{{ entry.number }}</td>
           <td class="random-view__cell-middle random-view__actions">
             <span class="random-view__row-actions">
-              <button class="button is-small is-text" type="button" title="Today">
+              <div
+                v-if="scheduledTaskIds.has(entry.task.id)"
+                class="button is-small is-text is-scheduled"
+              >
+                <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
+              </div>
+              <button
+                v-else
+                class="button is-small is-text"
+                type="button"
+                title="Today"
+                @click="scheduleForToday(entry.task)"
+              >
                 <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
               </button>
               <button
@@ -215,6 +242,16 @@ async function confirmCompleteTask(payload) {
 .random-view__row-actions {
   display: flex;
   gap: 0.25rem;
+}
+
+.random-view__row-actions .is-scheduled,
+.random-view__row-actions .is-scheduled:hover {
+    color: var(--bulma-success);
+}
+
+.random-view__row-actions .is-scheduled:hover {
+    background-color: transparent;
+    cursor: default;
 }
 
 .random-view__cell-middle {

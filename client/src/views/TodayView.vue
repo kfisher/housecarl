@@ -67,13 +67,11 @@ async function removeTask(task) {
 
 <template>
   <div class="today-view">
-    <h1 class="title">Today</h1>
-
     <p v-if="error" class="notification is-danger">{{ error }}</p>
 
     <template v-else>
       <section v-if="overdueTasks.length > 0" class="today-view__section">
-        <h2 class="subtitle">Overdue</h2>
+        <h1 class="title">Overdue</h1>
         <ScheduledTaskList
           :tasks="overdueTasks"
           :loading="loading"
@@ -83,7 +81,7 @@ async function removeTask(task) {
       </section>
 
       <section class="today-view__section">
-        <h2 class="subtitle">Today</h2>
+        <h1 class="title">Today</h1>
         <ScheduledTaskList
           :tasks="todayTasks"
           :loading="loading"
