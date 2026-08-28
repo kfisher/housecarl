@@ -19,3 +19,11 @@ export async function createTaskNote(taskId, text) {
   if (!response.ok) throw new Error('Failed to add task note')
   return response.json()
 }
+
+/**
+ * Deletes a task note.
+ */
+export async function deleteTaskNote(noteId) {
+  const response = await fetch(`/api/task-notes/${noteId}`, { method: 'DELETE' })
+  if (!response.ok) throw new Error('Failed to delete task note')
+}

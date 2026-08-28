@@ -1,10 +1,10 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { fetchScheduledTaskIds, scheduleTaskToday } from '@/api/scheduledTasks'
 import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
 import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
-import ConfirmModal from '@/components/ConfirmModal.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 import { taskStateLabels, taskStateOptions } from '@/constants/taskState'
 import { useRoomsStore } from '@/stores/rooms'
@@ -17,6 +17,7 @@ const props = defineProps({
 })
 
 const roomsStore = useRoomsStore()
+const router = useRouter()
 
 const room = ref(null)
 const loading = ref(false)
@@ -80,13 +81,6 @@ watch([groupBy, sortBy, selectedStates], () => {
 }, { deep: true })
 
 const taskModalOpen = ref(false)
-const editingTask = ref(null)
-
-const deleteTaskModalOpen = ref(false)
-const deleteTaskTarget = ref(null)
-const deleteTaskMessage = computed(() =>
-  deleteTaskTarget.value ? `Delete "${deleteTaskTarget.value.title}"? This cannot be undone.` : '',
-)
 
 const completeTaskModalOpen = ref(false)
 const completingTask = ref(null)
@@ -129,12 +123,6 @@ onMounted(refreshScheduledTaskIds)
 watch(() => props.id, fetchRoom)
 
 function openAddTaskModal() {
-  editingTask.value = null
-  taskModalOpen.value = true
-}
-
-function openEditTaskModal(task) {
-  editingTask.value = task
   taskModalOpen.value = true
 }
 
@@ -142,10 +130,9 @@ function closeTaskModal() {
   taskModalOpen.value = false
 }
 
-async function submitTask({ id, ...body }) {
-  const url = id ? `/api/tasks/${id}` : '/api/tasks'
-  const response = await fetch(url, {
-    method: id ? 'PATCH' : 'POST',
+async function submitTask(body) {
+  const response = await fetch('/api/tasks', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
@@ -154,23 +141,8 @@ async function submitTask({ id, ...body }) {
   await fetchRoom()
 }
 
-function requestDeleteTask() {
-  deleteTaskTarget.value = editingTask.value
-  closeTaskModal()
-  deleteTaskModalOpen.value = true
-}
-
-function closeDeleteTaskModal() {
-  deleteTaskModalOpen.value = false
-  deleteTaskTarget.value = null
-}
-
-async function confirmDeleteTask() {
-  if (!deleteTaskTarget.value) return
-  const response = await fetch(`/api/tasks/${deleteTaskTarget.value.id}`, { method: 'DELETE' })
-  if (!response.ok) return
-  closeDeleteTaskModal()
-  await fetchRoom()
+function goToTask(task) {
+  router.push({ name: 'task', params: { id: props.id, taskId: task.id } })
 }
 
 async function scheduleForToday(task) {
@@ -368,8 +340,13 @@ function formatDate(value) {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="task in section.tasks" :key="task.id" class="room-view__task-row">
-              <td class="room-view__cell-middle room-view__actions">
+            <tr
+              v-for="task in section.tasks"
+              :key="task.id"
+              class="room-view__task-row"
+              @click="goToTask(task)"
+            >
+              <td class="room-view__cell-middle room-view__actions" @click.stop>
                 <span class="room-view__row-actions">
                   <div
                     v-if="scheduledTaskIds.has(task.id)"
@@ -393,14 +370,6 @@ function formatDate(value) {
                     @click="openCompleteTaskModal(task)"
                   >
                     <font-awesome-icon :icon="['fas', 'check']" size="sm" />
-                  </button>
-                  <button
-                    class="button is-small is-text"
-                    type="button"
-                    title="Edit"
-                    @click="openEditTaskModal(task)"
-                  >
-                    <font-awesome-icon :icon="['fas', 'pencil']" size="sm" />
                   </button>
                 </span>
               </td>
@@ -431,19 +400,9 @@ function formatDate(value) {
       :open="taskModalOpen"
       :rooms="roomsStore.rooms"
       :default-room-id="Number(props.id)"
-      :task="editingTask"
+      :task="null"
       @submit="submitTask"
       @close="closeTaskModal"
-      @delete="requestDeleteTask"
-    />
-
-    <ConfirmModal
-      :open="deleteTaskModalOpen"
-      heading="Delete Task"
-      :message="deleteTaskMessage"
-      confirm-label="Delete"
-      @confirm="confirmDeleteTask"
-      @close="closeDeleteTaskModal"
     />
 
     <CompleteTaskModal
@@ -499,6 +458,10 @@ function formatDate(value) {
 
 .room-view__task-row:hover .room-view__row-actions {
   display: flex;
+}
+
+.room-view__task-row {
+  cursor: pointer;
 }
 
 .room-view__cell-middle {

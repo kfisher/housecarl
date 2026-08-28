@@ -22,7 +22,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['submit', 'close', 'delete'])
+const emit = defineEmits(['submit', 'close'])
 
 const title = ref('')
 const description = ref('')
@@ -169,10 +169,7 @@ function submit() {
         </div>
       </section>
       <footer class="modal-card-foot task-form-modal__foot">
-        <button v-if="task" class="button is-danger is-light" type="button" @click="emit('delete')">
-          Delete
-        </button>
-        <div class="buttons task-form-modal__save-cancel">
+        <div class="buttons">
           <button class="button is-primary" type="button" @click="submit">Save</button>
           <button class="button" type="button" @click="emit('close')">Cancel</button>
         </div>
@@ -183,12 +180,6 @@ function submit() {
 
 <style scoped>
 .task-form-modal__foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.task-form-modal__save-cancel {
-  margin-left: auto;
+  justify-content: flex-end;
 }
 </style>
