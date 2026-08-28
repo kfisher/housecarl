@@ -107,6 +107,38 @@ class Task(Base):
 
     room: Mapped[Room] = relationship(back_populates="tasks")
 
+    notes: Mapped[list[TaskNote]] = relationship(
+        back_populates="task",
+        cascade="all, delete-orphan",
+    )
+
+
+class TaskNote(Base):
+    """
+    Database model for notes attached to a task.
+
+    """
+
+    __tablename__ = "task_notes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+    date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+    )
+
+    text: Mapped[str] = mapped_column(String, nullable=False)
+
+    task_id: Mapped[int] = mapped_column(
+        ForeignKey("tasks.id"),
+        nullable=False,
+        index=True,
+    )
+
+    task: Mapped[Task] = relationship(back_populates="notes")
+
 
 class RandomTask(Base):
     """

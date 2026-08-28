@@ -197,6 +197,68 @@ class TaskDetails(TaskBase):
     )
 
 
+class TaskNoteBase(BaseModel):
+    """
+    Base task note model.
+
+    """
+
+    text: str = Field(
+        description="Text of the note.",
+    )
+
+
+class TaskNoteCreate(TaskNoteBase):
+    """
+    Model used when creating new task note entries in the database.
+
+    """
+
+    task_id: int = Field(
+        description="Id of the task the note is associated with.",
+    )
+
+
+class TaskNoteUpdate(BaseModel):
+    """
+    Model used for updating an existing task note entry in the database.
+
+    Only the fields that have a value provided will be updated. All
+    other fields will remain unchanged.
+    """
+
+    date: datetime | None = Field(
+        description="Date associated with the note.",
+        default=None,
+    )
+
+    text: str | None = Field(
+        description="Text of the note.",
+        default=None,
+    )
+
+
+class TaskNoteItem(TaskNoteBase):
+    """
+    Model used to get basic information about a task note.
+
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field(
+        description="The unique identifier for the task note.",
+    )
+
+    date: datetime = Field(
+        description="Date associated with the note.",
+    )
+
+    task: TaskItem = Field(
+        description="The task the note is associated with.",
+    )
+
+
 class RandomTaskGenerate(BaseModel):
     """
     Model used when generating a new set of random tasks.

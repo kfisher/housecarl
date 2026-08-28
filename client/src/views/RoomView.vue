@@ -256,12 +256,15 @@ function formatDate(value) {
           <span>Add Task</span>
         </button>
 
-        <button class="button" type="button">
+        <router-link
+          :to="{ name: 'room-inspect', params: { id: props.id } }"
+          class="button"
+        >
           <span class="icon is-small">
             <font-awesome-icon :icon="['fas', 'magnifying-glass']" size="sm" />
           </span>
           <span>Inspect</span>
-        </button>
+        </router-link>
 
         <div
           ref="displayRef"
