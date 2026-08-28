@@ -23,8 +23,6 @@ const loading = ref(false)
 const error = ref(null)
 
 const searchText = ref('')
-const groupBy = ref('none')
-const sortBy = ref('state')
 
 const stateLabels = taskStateLabels
 const stateOptions = taskStateOptions
@@ -36,7 +34,50 @@ const stateTagClass = {
   3: 'is-success',
 }
 
-const selectedStates = ref(stateOptions.map((option) => option.value))
+const DISPLAY_SETTINGS_STORAGE_KEY = 'housecarl:room-display-settings'
+const groupByValues = ['none', 'state']
+const sortByValues = ['state', 'name', 'lastPerformed', 'lastInspected']
+const allStateValues = stateOptions.map((option) => option.value)
+
+function loadDisplaySettings() {
+  try {
+    return JSON.parse(localStorage.getItem(DISPLAY_SETTINGS_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+
+const savedDisplaySettings = loadDisplaySettings()
+
+const groupBy = ref(
+  groupByValues.includes(savedDisplaySettings?.groupBy) ? savedDisplaySettings.groupBy : 'none',
+)
+const sortBy = ref(
+  sortByValues.includes(savedDisplaySettings?.sortBy) ? savedDisplaySettings.sortBy : 'state',
+)
+
+const savedSelectedStates = Array.isArray(savedDisplaySettings?.selectedStates)
+  ? savedDisplaySettings.selectedStates.filter((value) => allStateValues.includes(value))
+  : null
+
+const selectedStates = ref(
+  savedSelectedStates?.length > 0 ? savedSelectedStates : [...allStateValues],
+)
+
+watch([groupBy, sortBy, selectedStates], () => {
+  try {
+    localStorage.setItem(
+      DISPLAY_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        groupBy: groupBy.value,
+        sortBy: sortBy.value,
+        selectedStates: selectedStates.value,
+      }),
+    )
+  } catch {
+    // Ignore write failures (e.g. storage disabled or full).
+  }
+}, { deep: true })
 
 const taskModalOpen = ref(false)
 const editingTask = ref(null)
@@ -186,6 +227,19 @@ const filteredTasks = computed(() => {
   })
 })
 
+const sections = computed(() => {
+  if (groupBy.value === 'state') {
+    return stateOptions
+      .map((option) => ({
+        key: option.value,
+        label: option.label,
+        tasks: filteredTasks.value.filter((task) => task.state === option.value),
+      }))
+      .filter((section) => section.tasks.length > 0)
+  }
+  return [{ key: 'all', label: null, tasks: filteredTasks.value }]
+})
+
 function formatDate(value) {
   return new Date(value).toLocaleDateString()
 }
@@ -239,6 +293,7 @@ function formatDate(value) {
                     <div class="select is-small is-fullwidth">
                       <select v-model="groupBy">
                         <option value="none">None</option>
+                        <option value="state">State</option>
                       </select>
                     </div>
                   </div>
@@ -290,72 +345,84 @@ function formatDate(value) {
       </div>
     </div>
 
-    <p v-if="error" class="notification is-danger">{{ error }}</p>
+    <div>
+      <div v-for="section in sections" :key="section.key" class="room-view__section">
+        <h2
+          v-if="section.label"
+          class="tag mt-4 is-size-6 room-view__section-header"
+          :class="stateTagClass[section.key]"
+        >
+          {{ section.label }}
+        </h2>
 
-    <table v-else class="table is-fullwidth is-hoverable room-view__table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>State</th>
-          <th class="room-view__task-column">Task</th>
-          <th>Last Performed</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="task in filteredTasks" :key="task.id" class="room-view__task-row">
-          <td class="room-view__cell-middle room-view__actions">
-            <span class="room-view__row-actions">
-              <div
-                v-if="scheduledTaskIds.has(task.id)"
-                class="button is-small is-text is-scheduled"
-              >
-                <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
-              </div>
-              <button
-                v-else
-                class="button is-small is-text"
-                type="button"
-                title="Today"
-                @click="scheduleForToday(task)"
-              >
-                <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
-              </button>
-              <button
-                class="button is-small is-text"
-                type="button"
-                title="Complete"
-                @click="openCompleteTaskModal(task)"
-              >
-                <font-awesome-icon :icon="['fas', 'check']" size="sm" />
-              </button>
-              <button
-                class="button is-small is-text"
-                type="button"
-                title="Edit"
-                @click="openEditTaskModal(task)"
-              >
-                <font-awesome-icon :icon="['fas', 'pencil']" size="sm" />
-              </button>
-            </span>
-          </td>
-          <td class="room-view__cell-middle">
-            <span class="tag room-view__state-tag" :class="stateTagClass[task.state]">
-              {{ stateLabels[task.state] }}
-            </span>
-          </td>
-          <td>
-            <p>{{ task.title }}</p>
-            <p v-if="task.description" class="room-view__task-description">
-              {{ task.description }}
-            </p>
-          </td>
-          <td class="room-view__cell-middle">{{ formatDate(task.last_performed) }}</td>
-        </tr>
-        <tr v-if="!loading && filteredTasks.length === 0">
-          <td colspan="4" class="has-text-centered has-text-grey">No tasks found.</td>
-        </tr>
-      </tbody>
-    </table>
+        <table class="table is-fullwidth is-hoverable room-view__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th v-if="!section.label">State</th>
+              <th class="room-view__task-column">Task</th>
+              <th>Last Performed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="task in section.tasks" :key="task.id" class="room-view__task-row">
+              <td class="room-view__cell-middle room-view__actions">
+                <span class="room-view__row-actions">
+                  <div
+                    v-if="scheduledTaskIds.has(task.id)"
+                    class="button is-small is-text is-scheduled"
+                  >
+                    <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
+                  </div>
+                  <button
+                    v-else
+                    class="button is-small is-text"
+                    type="button"
+                    title="Today"
+                    @click="scheduleForToday(task)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
+                  </button>
+                  <button
+                    class="button is-small is-text"
+                    type="button"
+                    title="Complete"
+                    @click="openCompleteTaskModal(task)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'check']" size="sm" />
+                  </button>
+                  <button
+                    class="button is-small is-text"
+                    type="button"
+                    title="Edit"
+                    @click="openEditTaskModal(task)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'pencil']" size="sm" />
+                  </button>
+                </span>
+              </td>
+              <td v-if="!section.label" class="room-view__cell-middle">
+                <span class="tag room-view__state-tag" :class="stateTagClass[task.state]">
+                  {{ stateLabels[task.state] }}
+                </span>
+              </td>
+              <td>
+                <p>{{ task.title }}</p>
+                <p v-if="task.description" class="room-view__task-description">
+                  {{ task.description }}
+                </p>
+              </td>
+              <td class="room-view__cell-middle">{{ formatDate(task.last_performed) }}</td>
+            </tr>
+            <tr v-if="!loading && section.tasks.length === 0">
+              <td :colspan="section.label ? 3 : 4" class="has-text-centered has-text-grey">
+                No tasks found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <TaskFormModal
       :open="taskModalOpen"
@@ -455,6 +522,13 @@ function formatDate(value) {
 
 .room-view__state-tag {
   width: 5.5rem;
+}
+
+.room-view__section + .room-view__section {
+  margin-top: 1.5rem;
+}
+
+.room-view__section-header {
 }
 
 .room-view__state-filter {

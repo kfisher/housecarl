@@ -140,9 +140,7 @@ async function confirmCompleteTask(payload) {
       </div>
     </div>
 
-    <p v-if="error" class="notification is-danger">{{ error }}</p>
-
-    <table v-else class="table is-fullwidth is-hoverable random-view__table">
+    <table class="table is-fullwidth is-hoverable random-view__table">
       <tbody>
         <tr
           v-for="entry in randomTasks"

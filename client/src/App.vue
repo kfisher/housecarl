@@ -15,7 +15,8 @@ import NavSidebar from '@/components/NavSidebar.vue'
         <NavSidebar />
       </div>
       <div class="column app-layout__content">
-        <router-view />
+        <p v-if="error" class="notification is-danger">{{ error }}</p>
+        <router-view v-else />
       </div>
     </div>
   </div>

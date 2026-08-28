@@ -67,30 +67,26 @@ async function removeTask(task) {
 
 <template>
   <div class="today-view">
-    <p v-if="error" class="notification is-danger">{{ error }}</p>
+    <section v-if="overdueTasks.length > 0" class="today-view__section">
+      <h1 class="title">Overdue</h1>
+      <ScheduledTaskList
+        :tasks="overdueTasks"
+        :loading="loading"
+        @complete="openCompleteTaskModal"
+        @remove="removeTask"
+      />
+    </section>
 
-    <template v-else>
-      <section v-if="overdueTasks.length > 0" class="today-view__section">
-        <h1 class="title">Overdue</h1>
-        <ScheduledTaskList
-          :tasks="overdueTasks"
-          :loading="loading"
-          @complete="openCompleteTaskModal"
-          @remove="removeTask"
-        />
-      </section>
-
-      <section class="today-view__section">
-        <h1 class="title">Today</h1>
-        <ScheduledTaskList
-          :tasks="todayTasks"
-          :loading="loading"
-          empty-message="No tasks scheduled for today."
-          @complete="openCompleteTaskModal"
-          @remove="removeTask"
-        />
-      </section>
-    </template>
+    <section class="today-view__section">
+      <h1 class="title">Today</h1>
+      <ScheduledTaskList
+        :tasks="todayTasks"
+        :loading="loading"
+        empty-message="No tasks scheduled for today."
+        @complete="openCompleteTaskModal"
+        @remove="removeTask"
+      />
+    </section>
 
     <CompleteTaskModal
       :open="completeTaskModalOpen"
