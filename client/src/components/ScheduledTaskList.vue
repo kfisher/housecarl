@@ -16,6 +16,8 @@ defineProps({
   },
 })
 
+const emit = defineEmits(['complete'])
+
 const stateLabels = taskStateLabels
 
 const stateTagClass = {
@@ -35,7 +37,12 @@ const stateTagClass = {
             <button class="button is-small is-text" type="button" title="Remove">
               <font-awesome-icon :icon="['fas', 'xmark']" size="sm" />
             </button>
-            <button class="button is-small is-text" type="button" title="Complete">
+            <button
+              class="button is-small is-text"
+              type="button"
+              title="Complete"
+              @click="emit('complete', entry.task)"
+            >
               <font-awesome-icon :icon="['fas', 'check']" size="sm" />
             </button>
           </span>

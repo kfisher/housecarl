@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 
+import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
+import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import RandomTaskCountModal from '@/components/RandomTaskCountModal.vue'
 import { taskStateLabels } from '@/constants/taskState'
 
@@ -12,6 +14,9 @@ const lastCount = ref(4)
 const countModalOpen = ref(false)
 
 const selectedTaskId = ref(null)
+
+const completeTaskModalOpen = ref(false)
+const completingTask = ref(null)
 
 const stateLabels = taskStateLabels
 
@@ -73,6 +78,29 @@ function selectRandomTask() {
   const index = Math.floor(Math.random() * randomTasks.value.length)
   selectedTaskId.value = randomTasks.value[index].id
 }
+
+function openCompleteTaskModal(task) {
+  completingTask.value = task
+  completeTaskModalOpen.value = true
+}
+
+function closeCompleteTaskModal() {
+  completeTaskModalOpen.value = false
+  completingTask.value = null
+}
+
+async function confirmCompleteTask(payload) {
+  if (!completingTask.value) return
+  const response = await fetch(`/api/tasks/${completingTask.value.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) return
+  await removeCompletedTaskFromLists(completingTask.value.id)
+  closeCompleteTaskModal()
+  await fetchRandomTasks()
+}
 </script>
 
 <template>
@@ -113,7 +141,12 @@ function selectRandomTask() {
               <button class="button is-small is-text" type="button" title="Today">
                 <font-awesome-icon :icon="['fas', 'calendar-day']" size="sm" />
               </button>
-              <button class="button is-small is-text" type="button" title="Complete">
+              <button
+                class="button is-small is-text"
+                type="button"
+                title="Complete"
+                @click="openCompleteTaskModal(entry.task)"
+              >
                 <font-awesome-icon :icon="['fas', 'check']" size="sm" />
               </button>
             </span>
@@ -144,6 +177,14 @@ function selectRandomTask() {
       :count="lastCount"
       @confirm="confirmCount"
       @close="closeCountModal"
+    />
+
+    <CompleteTaskModal
+      :open="completeTaskModalOpen"
+      :task-title="completingTask?.title"
+      :room-title="completingTask?.room?.title"
+      @confirm="confirmCompleteTask"
+      @close="closeCompleteTaskModal"
     />
   </div>
 </template>

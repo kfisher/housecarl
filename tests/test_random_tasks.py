@@ -179,5 +179,58 @@ def test_generate_replaces_existing_random_tasks(client):
     assert [entry["id"] for entry in listed] == [entry["id"] for entry in second.json()]
 
 
+def test_remove_returns_404_for_task_not_in_selection(client):
+    room = create_room(client)
+    task = make_overdue_task(client, room["id"])
+
+    response = client.delete(f"/api/random-tasks/{task['id']}")
+
+    assert response.status_code == 404
+
+
+def test_remove_deletes_the_random_task_entry(client):
+    room = create_room(client)
+    task = make_overdue_task(client, room["id"])
+    generate = client.post("/api/random-tasks", json={"count": 4})
+    assert generate.status_code == 201
+
+    response = client.delete(f"/api/random-tasks/{task['id']}")
+
+    assert response.status_code == 204
+    listed = client.get("/api/random-tasks").json()
+    assert listed == []
+
+
+def test_remove_replaces_with_another_eligible_task_in_the_same_slot(client):
+    room = create_room(client)
+    removed = make_overdue_task(client, room["id"], title="Removed task")
+    generate = client.post("/api/random-tasks", json={"count": 4})
+    assert generate.status_code == 201
+    number = generate.json()[0]["number"]
+
+    replacement = make_overdue_task(client, room["id"], title="Replacement task")
+
+    response = client.delete(f"/api/random-tasks/{removed['id']}")
+
+    assert response.status_code == 204
+    listed = client.get("/api/random-tasks").json()
+    assert len(listed) == 1
+    assert listed[0]["number"] == number
+    assert listed[0]["task"]["title"] == replacement["title"]
+
+
+def test_remove_leaves_slot_empty_when_no_replacement_is_eligible(client):
+    room = create_room(client)
+    removed = make_overdue_task(client, room["id"])
+    generate = client.post("/api/random-tasks", json={"count": 4})
+    assert generate.status_code == 201
+
+    response = client.delete(f"/api/random-tasks/{removed['id']}")
+
+    assert response.status_code == 204
+    listed = client.get("/api/random-tasks").json()
+    assert listed == []
+
+
 if __name__ == "__main__":
     pass

@@ -8,6 +8,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  taskTitle: {
+    type: String,
+    default: '',
+  },
+  roomTitle: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['confirm', 'close'])
@@ -53,6 +61,11 @@ function confirm() {
       </header>
       <section class="modal-card-body">
         <div class="field">
+          <p class="complete-task-modal__task-title">{{ taskTitle }}</p>
+          <p class="complete-task-modal__room-title">{{ roomTitle }}</p>
+        </div>
+
+        <div class="field">
           <label class="label">State</label>
           <div class="control">
             <div class="select is-fullwidth">
@@ -89,5 +102,14 @@ function confirm() {
 <style scoped>
 .complete-task-modal__foot {
   justify-content: flex-end;
+}
+
+.complete-task-modal__task-title {
+  font-weight: 600;
+}
+
+.complete-task-modal__room-title {
+  font-size: 0.85em;
+  color: var(--bulma-text-weak);
 }
 </style>

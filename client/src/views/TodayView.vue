@@ -1,12 +1,17 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 
+import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
+import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import ScheduledTaskList from '@/components/ScheduledTaskList.vue'
 
 const overdueTasks = ref([])
 const todayTasks = ref([])
 const loading = ref(false)
 const error = ref(null)
+
+const completeTaskModalOpen = ref(false)
+const completingTask = ref(null)
 
 async function fetchScheduledTasks() {
   loading.value = true
@@ -29,6 +34,29 @@ async function fetchScheduledTasks() {
 }
 
 onMounted(fetchScheduledTasks)
+
+function openCompleteTaskModal(task) {
+  completingTask.value = task
+  completeTaskModalOpen.value = true
+}
+
+function closeCompleteTaskModal() {
+  completeTaskModalOpen.value = false
+  completingTask.value = null
+}
+
+async function confirmCompleteTask(payload) {
+  if (!completingTask.value) return
+  const response = await fetch(`/api/tasks/${completingTask.value.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) return
+  await removeCompletedTaskFromLists(completingTask.value.id)
+  closeCompleteTaskModal()
+  await fetchScheduledTasks()
+}
 </script>
 
 <template>
@@ -40,7 +68,11 @@ onMounted(fetchScheduledTasks)
     <template v-else>
       <section v-if="overdueTasks.length > 0" class="today-view__section">
         <h2 class="subtitle">Overdue</h2>
-        <ScheduledTaskList :tasks="overdueTasks" :loading="loading" />
+        <ScheduledTaskList
+          :tasks="overdueTasks"
+          :loading="loading"
+          @complete="openCompleteTaskModal"
+        />
       </section>
 
       <section class="today-view__section">
@@ -49,9 +81,18 @@ onMounted(fetchScheduledTasks)
           :tasks="todayTasks"
           :loading="loading"
           empty-message="No tasks scheduled for today."
+          @complete="openCompleteTaskModal"
         />
       </section>
     </template>
+
+    <CompleteTaskModal
+      :open="completeTaskModalOpen"
+      :task-title="completingTask?.title"
+      :room-title="completingTask?.room?.title"
+      @confirm="confirmCompleteTask"
+      @close="closeCompleteTaskModal"
+    />
   </div>
 </template>
 

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
 import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
@@ -141,6 +142,7 @@ async function confirmCompleteTask(payload) {
     body: JSON.stringify(payload),
   })
   if (!response.ok) return
+  await removeCompletedTaskFromLists(completingTask.value.id)
   closeCompleteTaskModal()
   await fetchRoom()
 }
@@ -349,6 +351,8 @@ function formatDate(value) {
 
     <CompleteTaskModal
       :open="completeTaskModalOpen"
+      :task-title="completingTask?.title"
+      :room-title="room?.title"
       @confirm="confirmCompleteTask"
       @close="closeCompleteTaskModal"
     />
