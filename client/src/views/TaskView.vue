@@ -171,36 +171,26 @@ async function confirmDeleteNote() {
 <template>
   <div class="task-view">
     <template v-if="!loading && !error && task">
-      <div class="task-view__toolbar">
-        <router-link :to="{ name: 'room', params: { id: props.id } }" class="button">
-          <span class="icon is-small">
-            <font-awesome-icon :icon="['fas', 'arrow-left']" size="sm" />
-          </span>
-          <span>Back</span>
-        </router-link>
-
-        <div class="task-view__toolbar-actions">
-          <button class="button" type="button" @click="openEditModal">
-            <span class="icon is-small">
-              <font-awesome-icon :icon="['fas', 'pencil']" size="sm" />
-            </span>
-            <span>Edit</span>
-          </button>
-          <button class="button" type="button" @click="openDeleteModal">
-            <span class="icon is-small">
-              <font-awesome-icon :icon="['fas', 'trash']" size="sm" />
-            </span>
-            <span>Delete</span>
-          </button>
-        </div>
-      </div>
-
       <div class="task-view__task">
         <div class="task-view__title-row">
           <div class="tag task-view__state-tag mt-1" :class="stateTagClass[task.state]">
             {{ stateLabels[task.state] }}
           </div>
           <h1 class="title">{{ task.title }}</h1>
+          <div class="task-view__toolbar-actions">
+            <button class="button" type="button" @click="openEditModal">
+              <span class="icon is-small">
+                <font-awesome-icon :icon="['fas', 'pencil']" size="sm" />
+              </span>
+              <span>Edit</span>
+            </button>
+            <button class="button" type="button" @click="openDeleteModal">
+              <span class="icon is-small">
+                <font-awesome-icon :icon="['fas', 'trash']" size="sm" />
+              </span>
+              <span>Delete</span>
+            </button>
+          </div>
         </div>
 
         <p v-if="task.description" class="task-view__description">
@@ -321,6 +311,7 @@ async function confirmDeleteNote() {
 
 .task-view__title-row .title {
   margin-bottom: 0;
+  flex: 1;
 }
 
 .task-view__state-tag {

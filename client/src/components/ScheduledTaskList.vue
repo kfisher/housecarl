@@ -1,4 +1,6 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
 import { taskStateLabels } from '@/constants/taskState'
 
 defineProps({
@@ -18,6 +20,8 @@ defineProps({
 
 const emit = defineEmits(['complete', 'remove'])
 
+const router = useRouter()
+
 const stateLabels = taskStateLabels
 
 const stateTagClass = {
@@ -26,13 +30,22 @@ const stateTagClass = {
   2: 'is-warning',
   3: 'is-success',
 }
+
+function goToTask(task) {
+  router.push({ name: 'task', params: { id: task.room.id, taskId: task.id } })
+}
 </script>
 
 <template>
   <table class="table is-fullwidth is-hoverable scheduled-task-list">
     <tbody>
-      <tr v-for="entry in tasks" :key="entry.id" class="scheduled-task-list__row">
-        <td class="scheduled-task-list__cell-middle scheduled-task-list__actions">
+      <tr
+        v-for="entry in tasks"
+        :key="entry.id"
+        class="scheduled-task-list__row"
+        @click="goToTask(entry.task)"
+      >
+        <td class="scheduled-task-list__cell-middle scheduled-task-list__actions" @click.stop>
           <span class="scheduled-task-list__row-actions">
             <button
               class="button is-small is-text"
@@ -75,6 +88,10 @@ const stateTagClass = {
 </template>
 
 <style scoped>
+.scheduled-task-list__row {
+  cursor: pointer;
+}
+
 .scheduled-task-list__row-actions {
   display: flex;
   gap: 0.25rem;

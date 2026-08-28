@@ -1,11 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { fetchScheduledTaskIds, scheduleTaskToday } from '@/api/scheduledTasks'
 import { removeCompletedTaskFromLists } from '@/api/taskCompletion'
 import CompleteTaskModal from '@/components/CompleteTaskModal.vue'
 import RandomTaskCountModal from '@/components/RandomTaskCountModal.vue'
 import { taskStateLabels } from '@/constants/taskState'
+
+const router = useRouter()
 
 const randomTasks = ref([])
 const loading = ref(false)
@@ -81,6 +84,10 @@ async function confirmCount(count) {
   await generate(count)
 }
 
+function goToTask(task) {
+  router.push({ name: 'task', params: { id: task.room.id, taskId: task.id } })
+}
+
 function selectRandomTask() {
   if (randomTasks.value.length === 0) return
   const index = Math.floor(Math.random() * randomTasks.value.length)
@@ -147,9 +154,10 @@ async function confirmCompleteTask(payload) {
           :key="entry.id"
           class="random-view__task-row"
           :class="{ 'is-dark': entry.id === selectedTaskId }"
+          @click="goToTask(entry.task)"
         >
           <td class="random-view__cell-middle random-view__number">{{ entry.number }}</td>
-          <td class="random-view__cell-middle random-view__actions">
+          <td class="random-view__cell-middle random-view__actions" @click.stop>
             <span class="random-view__row-actions">
               <div
                 v-if="scheduledTaskIds.has(entry.task.id)"
@@ -235,6 +243,10 @@ async function confirmCompleteTask(payload) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.random-view__task-row {
+  cursor: pointer;
 }
 
 .random-view__row-actions {
