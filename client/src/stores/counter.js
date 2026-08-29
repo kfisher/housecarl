@@ -1,3 +1,6 @@
+// Copyright 2026 Kevin Fisher. All rights reserved.
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 

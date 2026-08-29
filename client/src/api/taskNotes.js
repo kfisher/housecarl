@@ -1,3 +1,6 @@
+// Copyright 2026 Kevin Fisher. All rights reserved.
+// SPDX-License-Identifier: AGPL-3.0-only
+
 /**
  * Returns the notes for a task, newest first.
  */

@@ -1,3 +1,6 @@
+// Copyright 2026 Kevin Fisher. All rights reserved.
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { mount } from '@vue/test-utils'

@@ -1,3 +1,8 @@
+<!--
+Copyright 2026 Kevin Fisher. All rights reserved.
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 

@@ -1,3 +1,6 @@
+// Copyright 2026 Kevin Fisher. All rights reserved.
+// SPDX-License-Identifier: AGPL-3.0-only
+
 /**
  * Removes a completed task from the scheduled and random task lists, if
  * it was present on either. The random task's slot, if any, is
