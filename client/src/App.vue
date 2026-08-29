@@ -5,13 +5,29 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <script setup>
 import NavSidebar from '@/components/NavSidebar.vue'
+import { theme, toggleTheme } from '@/theme'
 </script>
 
 <template>
   <div class="app-shell">
-    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <nav class="navbar" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <span class="navbar-item app-navbar__brand">Housecarl</span>
+      </div>
+      <div class="navbar-menu is-active">
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <button
+              type="button"
+              class="button is-text"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+              @click="toggleTheme"
+            >
+              <font-awesome-icon :icon="['fas', theme === 'dark' ? 'moon' : 'sun']" />
+            </button>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -20,8 +36,7 @@ import NavSidebar from '@/components/NavSidebar.vue'
         <NavSidebar />
       </div>
       <div class="column app-layout__content">
-        <p v-if="error" class="notification is-danger">{{ error }}</p>
-        <router-view v-else />
+        <router-view />
       </div>
     </div>
   </div>
@@ -32,6 +47,11 @@ import NavSidebar from '@/components/NavSidebar.vue'
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.app-shell .navbar {
+  background-color: var(--bulma-scheme-main);
+  border-bottom: 1px solid var(--bulma-border-weak);
 }
 
 .app-navbar__brand {
