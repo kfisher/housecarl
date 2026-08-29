@@ -89,6 +89,14 @@ function submit() {
 </template>
 
 <style scoped>
+.modal-card-head {
+  box-shadow: none;
+}
+
+.modal-card-foot {
+  background-color: var(--bulma-scheme-main);
+}
+
 .room-form-modal__foot {
   display: flex;
   justify-content: space-between;
