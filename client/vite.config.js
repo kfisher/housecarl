@@ -20,4 +20,14 @@ export default defineConfig({
       '/api': 'http://localhost:8000',
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Bulma's own source triggers Sass deprecation warnings (e.g. the
+        // legacy if() syntax); quietDeps silences warnings that originate
+        // in dependencies while still surfacing them for our own styles.
+        quietDeps: true,
+      },
+    },
+  },
 })

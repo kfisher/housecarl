@@ -1,0 +1,114 @@
+@charset "utf-8";
+
+// Bulma theme built using the Nord (https://www.nordtheme.com/) color pallet.
+//
+// Light and dark variants live in the same stylesheet and are switched by
+// setting `data-theme="light"` or `data-theme="dark"` on the `<html>`
+// element (see src/theme.js), rather than by swapping which stylesheet is
+// linked.
+
+@use "./nord-palette" as nord;
+
+@use "bulma/sass/utilities/initial-variables" with (
+  $light-l: 94%,
+  $dark-l: 22%,
+  $turquoise: nord.$nord7,
+  // $primary
+  $cyan: nord.$nord8,
+  // $info
+  $blue: nord.$nord10,
+  // $link
+  $green: nord.$nord14,
+  // $success
+  $yellow: nord.$nord13,
+  // $warning
+  $red: nord.$nord11,
+  // $danger
+  $orange: nord.$nord12,
+  $purple: nord.$nord15
+);
+
+@use "bulma/sass/utilities/css-variables" as cv;
+@use "bulma/sass/themes/light" as light-theme;
+@use "bulma/sass/themes/dark" as dark-theme;
+@use "bulma/sass/themes/setup" as theme-setup;
+@use "bulma/sass/base";
+@use "bulma/sass/elements";
+@use "bulma/sass/form";
+@use "bulma/sass/components";
+@use "bulma/sass/grid";
+@use "bulma/sass/layout";
+@use "bulma/sass/base/skeleton";
+@use "bulma/sass/helpers";
+
+// Default to the light theme so the page still renders sensibly before
+// theme.js has a chance to set `data-theme` on the document element.
+:root,
+[data-theme="light"] {
+  @include light-theme.light-theme;
+
+  // Snap Bulma's generic light-mode grey ramp (and its scheme hue/saturation)
+  // to the actual Snow Storm (nord4-6) / Polar Night (nord0-3) colors, so the
+  // theme reads as Nord rather than Bulma's default off-white/charcoal.
+  @include cv.register-vars(
+    (
+      "scheme-h": 218,
+      "scheme-s": 27%,
+      "scheme-main-l": 94%,
+      // nord6 (page background)
+      "scheme-main-bis-l": 92%,
+      // nord5
+      "scheme-main-ter-l": 88%,
+      // nord4
+      "background-l": 92%,
+      // nord5 (subtle fills)
+      "border-weak-l": 90%,
+      "border-l": 82%,
+      "text-weak-l": 42%,
+      // nord3 (muted text)
+      "text-l": 32%,
+      // nord2 (body text)
+      "text-strong-l": 28%,
+      // nord1
+      "text-title-l": 22%,
+      // nord0 (headings)
+    )
+  );
+
+  @include theme-setup.setup-theme;
+}
+
+[data-theme="dark"] {
+  @include dark-theme.dark-theme;
+
+  // Snap Bulma's generic dark-mode grey ramp (and its scheme hue/saturation)
+  // to the actual lightness of Polar Night (nord0-3) and Snow Storm
+  // (nord4-6), so the theme reads as Nord rather than Bulma's default
+  // near-black/off-white.
+  @include cv.register-vars(
+    (
+      "scheme-h": 220,
+      "scheme-s": 16%,
+      "scheme-main-l": 22%,
+      // nord0 (page background)
+      "scheme-main-bis-l": 25%,
+      "scheme-main-ter-l": 28%,
+      // nord1
+      "background-l": 28%,
+      // nord1 (subtle fills)
+      "border-weak-l": 32%,
+      // nord2
+      "border-l": 36%,
+      // nord3
+      "text-weak-l": 60%,
+      "text-l": 88%,
+      // nord4 (body text)
+      "text-strong-l": 92%,
+      // nord5
+      "text-title-l": 94%,
+      // nord6 (headings)
+    )
+  );
+
+  @include theme-setup.setup-theme;
+}
