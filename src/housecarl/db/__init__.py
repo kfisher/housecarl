@@ -13,11 +13,9 @@ from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from housecarl.db.models import Base
+from housecarl.config import settings
 
-DATABASE_URL = "sqlite:///housecarl.db"
-
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(settings.database_url)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -32,16 +30,6 @@ def get_session() -> Generator[Session]:
 
 
 DatabaseSession = Annotated[Session, Depends(get_session)]
-
-
-def initialize():
-    """
-    Initializes the application database.
-
-    """
-    # TODO: This should be handled by migrations using a something like
-    #       [Alembic](https://alembic.sqlalchemy.org/en/latest/)
-    Base.metadata.create_all(engine)
 
 
 if __name__ == "__main__":

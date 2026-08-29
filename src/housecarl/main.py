@@ -11,8 +11,6 @@ from fastapi import FastAPI
 from housecarl import db
 from housecarl.routers import random_tasks, rooms, scheduled_tasks, task_notes, tasks
 
-db.initialize()
-
 app = FastAPI()
 
 app.include_router(rooms.router, prefix="/api/rooms", tags=["rooms"])
