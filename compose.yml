@@ -30,7 +30,7 @@ services:
   web:
     build: ./client
     ports:
-      - "80:80"
+      - "${WEB_PORT:-80}:80"
     depends_on:
       - api
 
