@@ -8,7 +8,6 @@ Application entry point.
 
 from fastapi import FastAPI
 
-from housecarl import db
 from housecarl.routers import random_tasks, rooms, scheduled_tasks, task_notes, tasks
 
 app = FastAPI()
