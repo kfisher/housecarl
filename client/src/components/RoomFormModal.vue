@@ -73,7 +73,7 @@ function submit() {
       <footer class="modal-card-foot room-form-modal__foot">
         <button
           v-if="showDelete"
-          class="button is-danger is-light"
+          class="button is-danger"
           type="button"
           @click="emit('delete')"
         >

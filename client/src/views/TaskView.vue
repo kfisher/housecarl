@@ -263,7 +263,7 @@ async function confirmDeleteNote() {
 
     <TaskFormModal
       :open="taskModalOpen"
-      :rooms="roomsStore.rooms"
+      :rooms="roomsStore.sortedRooms"
       :default-room-id="Number(props.id)"
       :task="task"
       @submit="submitTask"

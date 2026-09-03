@@ -403,7 +403,7 @@ function formatDate(value) {
 
     <TaskFormModal
       :open="taskModalOpen"
-      :rooms="roomsStore.rooms"
+      :rooms="roomsStore.sortedRooms"
       :default-room-id="Number(props.id)"
       :task="null"
       @submit="submitTask"

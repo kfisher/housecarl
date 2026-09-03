@@ -89,7 +89,7 @@ async function confirmDelete() {
     <p class="menu-label">Rooms</p>
 
     <ul class="menu-list">
-      <li v-for="room in roomsStore.rooms" :key="room.id">
+      <li v-for="room in roomsStore.sortedRooms" :key="room.id">
         <div class="nav-sidebar__row">
           <router-link :to="`/rooms/${room.id}`" active-class="is-active">
             {{ room.title }}

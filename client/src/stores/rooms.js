@@ -1,13 +1,17 @@
 // Copyright 2026 Kevin Fisher. All rights reserved.
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useRoomsStore = defineStore('rooms', () => {
   const rooms = ref([])
   const loading = ref(false)
   const error = ref(null)
+
+  const sortedRooms = computed(() =>
+    [...rooms.value].sort((a, b) => a.title.localeCompare(b.title)),
+  )
 
   async function fetchRooms() {
     loading.value = true
@@ -54,5 +58,5 @@ export const useRoomsStore = defineStore('rooms', () => {
     rooms.value = rooms.value.filter((room) => room.id !== id)
   }
 
-  return { rooms, loading, error, fetchRooms, addRoom, updateRoom, removeRoom }
+  return { rooms, sortedRooms, loading, error, fetchRooms, addRoom, updateRoom, removeRoom }
 })
