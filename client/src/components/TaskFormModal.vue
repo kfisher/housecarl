@@ -6,7 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 
+import { defaultFrequencyUnit, frequencyUnitOptions } from '@/constants/frequencyUnit'
 import { taskStateOptions } from '@/constants/taskState'
+import { parseFrequency } from '@/utils/frequency'
 
 const props = defineProps({
   open: {
@@ -31,7 +33,8 @@ const emit = defineEmits(['submit', 'close'])
 
 const title = ref('')
 const description = ref('')
-const frequencyWeeks = ref(1)
+const frequencyValue = ref(1)
+const frequencyUnit = ref(defaultFrequencyUnit)
 const state = ref(taskStateOptions[0].value)
 const roomId = ref(props.defaultRoomId)
 const titleInputRef = ref(null)
@@ -41,18 +44,9 @@ const heading = computed(() => (props.task ? 'Edit Task' : 'Add Task'))
 
 const isTitleValid = computed(() => title.value.trim().length > 0)
 const isFrequencyValid = computed(
-  () => Number.isInteger(frequencyWeeks.value) && frequencyWeeks.value >= 1,
+  () => Number.isInteger(frequencyValue.value) && frequencyValue.value >= 1,
 )
 const isRoomValid = computed(() => roomId.value != null)
-
-function parseFrequencyToWeeks(iso) {
-  const weekMatch = /^P(\d+)W$/.exec(iso)
-  if (weekMatch) return Number(weekMatch[1])
-
-  const dayMatch = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?)?$/.exec(iso)
-  const days = Number(dayMatch?.[1] || 0)
-  return Math.max(1, Math.round(days / 7))
-}
 
 watch(
   () => props.open,
@@ -61,12 +55,15 @@ watch(
     if (props.task) {
       title.value = props.task.title
       description.value = props.task.description ?? ''
-      frequencyWeeks.value = parseFrequencyToWeeks(props.task.frequency)
+      const frequency = parseFrequency(props.task.frequency)
+      frequencyValue.value = frequency.value
+      frequencyUnit.value = frequency.unit
       state.value = props.task.state
     } else {
       title.value = ''
       description.value = ''
-      frequencyWeeks.value = 1
+      frequencyValue.value = 1
+      frequencyUnit.value = defaultFrequencyUnit
       state.value = taskStateOptions[0].value
     }
     roomId.value = props.defaultRoomId
@@ -84,7 +81,7 @@ function submit() {
     id: props.task?.id,
     title: title.value.trim(),
     description: description.value.trim() || null,
-    frequency: `P${frequencyWeeks.value}W`,
+    frequency: `P${frequencyValue.value}${frequencyUnit.value}`,
     state: state.value,
     room_id: roomId.value,
   })
@@ -140,19 +137,34 @@ function submit() {
         </div>
 
         <div class="field">
-          <label class="label">Frequency (weeks)</label>
-          <div class="control">
-            <input
-              v-model.number="frequencyWeeks"
-              class="input"
-              :class="{ 'is-danger': attemptedSubmit && !isFrequencyValid }"
-              type="number"
-              min="1"
-              step="1"
-            />
+          <label class="label">Frequency</label>
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input
+                v-model.number="frequencyValue"
+                class="input"
+                :class="{ 'is-danger': attemptedSubmit && !isFrequencyValid }"
+                type="number"
+                min="1"
+                step="1"
+              />
+            </div>
+            <div class="control">
+              <div class="select">
+                <select v-model="frequencyUnit">
+                  <option
+                    v-for="option in frequencyUnitOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
           </div>
           <p v-if="attemptedSubmit && !isFrequencyValid" class="help is-danger">
-            Enter a frequency of at least 1 week.
+            Enter a frequency of at least 1.
           </p>
         </div>
 

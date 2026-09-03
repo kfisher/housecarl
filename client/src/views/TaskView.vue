@@ -12,6 +12,7 @@ import ConfirmModal from '@/components/ConfirmModal.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 import { taskStateLabels } from '@/constants/taskState'
 import { useRoomsStore } from '@/stores/rooms'
+import { formatFrequency } from '@/utils/frequency'
 
 const props = defineProps({
   id: {
@@ -214,6 +215,10 @@ async function confirmDeleteNote() {
           <p class="ml-5">
             <strong>Last Performed</strong><br />
             {{ formatDate(task.last_performed) }}
+          </p>
+          <p class="ml-5">
+            <strong>Frequency</strong><br />
+            {{ formatFrequency(task.frequency) }}
           </p>
         </div>
 
