@@ -51,7 +51,7 @@ watch(
 function confirm() {
   emit('confirm', {
     state: state.value,
-    last_performed: performedDate.value,
+    last_performed: new Date(`${performedDate.value}T00:00:00`).toISOString(),
   })
 }
 </script>
